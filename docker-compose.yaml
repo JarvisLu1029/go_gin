@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  go-app:
+    # build:
+    #   context: ./
+    #   dockerfile: Dockerfile
+    image: golang:latest
+    container_name: go_gin_env
+    volumes:
+      - ./backend:/home/backend/
+    ports:
+      - 8081:80
+    working_dir: /home/backend/
+    stdin_open: true
+    tty: true
+  db:
+    image: mysql:latest
+    container_name: gin_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=passw0rd!
+      - MYSQL_DATABASE=main
+      - MYSQL_USER=user1
+      - MYSQL_PASSWORD=user1
+      - TZ=Asia/Taipei
+    volumes:
+      - ./sql_data/:/var/lib/mysql/
+    ports: 
+      - 3308:3306
