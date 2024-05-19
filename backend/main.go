@@ -21,9 +21,15 @@ func main() {
 		})
 	})
 
+	auth := r.Group("/auth")
+	{
+		auth.POST("/register", controller.RegisterUser)
+	}
+
 	api := r.Group("/api")
 	{
 		api.POST("/posts", controller.PostCreate)
+		api.POST("/book", controller.CreateBook)
 	}
 
 	r.Run()
