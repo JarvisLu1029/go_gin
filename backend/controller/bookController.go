@@ -40,20 +40,6 @@ func CreateBook(c *gin.Context) {
 func ListBooks(c *gin.Context) {
 	userID := c.MustGet("user_id").(uint)
 
-	// var user models.User
-	// // 根據 username 查找 user
-	// result := initializers.DB.Where("username = ?", username).First(&user)
-
-	// if result.Error != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving user"})
-	// 	return
-	// }
-
-	// if result.RowsAffected == 0 {
-	// 	c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
-	// 	return
-	// }
-
 	var books []models.Book
 	result := initializers.DB.Where("user_id = ?", userID).Find(&books)
 
@@ -70,21 +56,7 @@ func ListBooks(c *gin.Context) {
 }
 
 func UpdateBook(c *gin.Context) {
-	username := c.Param("username")
-
-	var user models.User
-
-	result := initializers.DB.Where("username = ?", username).First(&user)
-
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving user"})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
-		return
-	}
+	userID := c.MustGet("user_id").(uint)
 
 	var bookUpdate struct {
 		ID          uint   `json:"id"`
@@ -99,7 +71,7 @@ func UpdateBook(c *gin.Context) {
 	}
 
 	var book models.Book
-	result = initializers.DB.Where("user_id = ? AND id = ?", user.ID, bookUpdate.ID).First(&book)
+	result := initializers.DB.Where("user_id = ? AND id = ?", userID, bookUpdate.ID).First(&book)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving book"})
@@ -126,14 +98,18 @@ func UpdateBook(c *gin.Context) {
 }
 
 func DeleteBook(c *gin.Context) {
+	userID := c.MustGet("user_id").(uint)
+
 	id := c.Param("id")
 
-	// var book models.Book
+	var book models.Book
+	if err := initializers.DB.First(&book, book.ID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
+		return
+	}
 
-	var user models.User
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON data"})
+	if book.UserID != uint(userID) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 

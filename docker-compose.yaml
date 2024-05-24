@@ -6,7 +6,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: golang:latest
-    container_name: go_gin_env
+    container_name: gin_env
     volumes:
       - ./backend:/usr/src/app
     ports:
